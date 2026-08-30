@@ -1,0 +1,128 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,bm,mathtools}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.65em}
+\newcommand{\RP}{\mathbb{RP}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\SSph}{\mathbb{S}}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\title{Optimal Color Immersion for Three-Dimensional Nematic Directors}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+
+\section{Motivation}
+
+A director field in a three-dimensional nematic liquid crystal is represented by a unit director
+\[
+\vect n=(n_x,n_y,n_z),\qquad \vect n\cdot\vect n=1,
+\]
+with the nematic identification
+\[
+\vect n\sim-\vect n.
+\]
+For visualization, we would like to assign a color to every possible director orientation. Because a displayed color is described by three coordinates (ultimately RGB), it is tempting to imagine that one can construct a one-to-one correspondence between three-dimensional nematic orientations and three-dimensional color coordinates.
+
+This is not a trivial coordinate-matching problem. The obstruction is topological.
+
+The space of all unit vectors is the sphere $\SSph^2$. Nematic symmetry identifies every antipodal pair $\vect n$ and $-\vect n$, so the physical orientation space is
+\[
+\SSph^2/\{\vect n\sim-\vect n\}\cong\RP^2,
+\]
+the real projective plane.
+
+A key starting point of this project is that $\RP^2$ cannot be continuously embedded in $\RR^3$. Equivalently, there is no continuous one-to-one assignment
+\[
+\RP^2\hookrightarrow\RR^3
+\]
+that realizes the nematic orientation space as a surface without self-identification. Since the RGB cube is a subset of $\RR^3$, restricting the target to physical RGB colors cannot remove this obstruction.
+
+Therefore, any continuous three-coordinate color representation of a three-dimensional nematic director field must fail to be globally one-to-one somewhere. The goal of this project is not to avoid that impossibility, but to construct the \emph{best possible immersion} for scientific visualization.
+
+\section{Embedding and immersion: what do they mean here?}
+
+Suppose we construct a smooth color map
+\[
+\vect c:\RP^2\longrightarrow\RR^3.
+\]
+An \emph{embedding} would mean, roughly, that the entire nematic orientation space is placed inside color space without identifying any two distinct physical orientations. Distinct points of $\RP^2$ would always receive distinct colors, and the resulting surface in color space would have no self-intersections. That is precisely what is impossible for $\RP^2$ in three dimensions.
+
+An \emph{immersion} is weaker. It only requires the map to remain locally two-dimensional. At every director orientation, two independent infinitesimal changes of orientation must produce two independent infinitesimal changes in color.
+
+More formally, at each point $[\vect n]\in\RP^2$, the differential
+\[
+D\vect c_{[\vect n]}:
+T_{[\vect n]}\RP^2\longrightarrow
+T_{\vect c([\vect n])}\RR^3
+\]
+must be injective. Since $T_{[\vect n]}\RP^2$ is two-dimensional, this is equivalent to
+\[
+\operatorname{rank}\!\left(D\vect c_{[\vect n]}\right)=2,
+\qquad \forall\,[\vect n]\in\RP^2.
+\]
+Thus an immersion is allowed to intersect itself globally: two distant director orientations may occasionally receive the same color. What is forbidden is a local collapse in which a two-dimensional neighborhood of director orientations is flattened into a curve or a point.
+
+This distinction is exactly what makes the visualization problem possible. A globally one-to-one map does not exist, but smooth immersions of $\RP^2$ into $\RR^3$ do exist. Classical examples include Boy's surface.
+
+\section{What should an optimal color immersion preserve?}
+
+For two unit nematic directors $\vect n$ and $\vect m$, a natural sign-invariant physical distance is
+\[
+d_Q(\vect n,\vect m)^2=1-(\vect n\cdot\vect m)^2.
+\]
+This distance vanishes both for $\vect m=\vect n$ and for $\vect m=-\vect n$, as required by nematic symmetry. It is also directly related to the Frobenius distance between uniaxial $Q$ tensors at fixed scalar order parameter.
+
+Ideally, perceptually similar colors should correspond to physically similar directors, while physically distant directors should receive perceptually distinct colors. A representative global metric objective is
+\begin{align*}
+\mathcal J_{\mathrm{pair}}
+={}&\iint_{\RP^2\times\RP^2}
+\Bigl[
+\lVert\vect c([\vect n])-\vect c([\vect m])\rVert^2\\
+&\qquad-\alpha\bigl(1-(\vect n\cdot\vect m)^2\bigr)
+\Bigr]^2\,
+\mathrm d\mu([\vect n])\,\mathrm d\mu([\vect m]),
+\end{align*}
+where $\mathrm d\mu$ is the uniform orientational measure and $\alpha$ sets the overall scale relating physical and perceptual distances.
+
+Metric fidelity is not the only requirement. For scientific visualization we also care about approximately uniform perceptual lightness, intuitive reference colors for important directions, sufficient contrast on a white background, confinement to the displayable sRGB gamut, and preservation of the immersion condition except for unavoidable global self-intersections.
+
+These requirements compete. In particular, forcing nearly constant lightness tends to flatten the image of $\RP^2$ toward a two-dimensional plane in color space, whereas metric fidelity may prefer to use all three perceptual dimensions. The appropriate object is therefore a controlled trade-off among physically and perceptually meaningful objectives.
+
+\section{RGB coordinates versus perceptual color space}
+
+The final colors must be displayable as sRGB values, but Euclidean distance in raw RGB coordinates is not a good model of perceived color difference. RGB should therefore be understood as the final display representation rather than necessarily the space in which the geometry is optimized.
+
+The working strategy is to construct the immersion in a three-dimensional perceptual color space such as OKLab,
+\[
+\vect c=(L,a,b),
+\]
+and then require the resulting colors to lie inside the sRGB gamut after conversion. This separates the geometry of the map from nematic orientation space into perceptual color space from the hardware/display constraint that the resulting colors must be realizable in sRGB.
+
+\section{Strategy of this project}
+
+The project begins with a known analytic immersion of $\RP^2$ related to Boy's surface. Rather than immediately searching over all possible maps, the first stage keeps this immersion geometry fixed and optimizes how it is affinely placed in perceptual color space:
+\[
+\vect c_B([\vect n])
+=\vect A\,\vect p_B(\vect n)+\boldsymbol\beta,
+\]
+where $\vect p_B$ is a fixed polynomial immersion, $\vect A\in\RR^{3\times3}$ is an affine linear transformation, and $\boldsymbol\beta\in\RR^3$ is a translation in color space.
+
+This stage asks: \emph{How good a nematic colormap can be obtained by optimally tuning a prescribed Boy-type immersion?}
+
+A later stage can remove the Boy-surface prior and optimize over a broader family of smooth even maps,
+\[
+\vect c(-\vect n)=\vect c(\vect n),
+\]
+for example using even spherical harmonics. Comparing the two stages will distinguish limitations caused by color tuning from limitations intrinsic to the chosen immersion geometry.
+
+The emphasis of this repository is reproducibility. Symbolic reductions, numerical optimization, parameter scans, and validation tests should be generated from the stated mathematical definitions rather than copied from hand-derived intermediate coefficients.
+
+The long-term objective is a colormap that makes three-dimensional nematic orientation as perceptually faithful, interpretable, and displayable as the topology of $\RP^2$ allows.
+
+\end{document}
